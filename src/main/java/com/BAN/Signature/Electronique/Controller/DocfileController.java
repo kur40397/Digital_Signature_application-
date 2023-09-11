@@ -5,6 +5,7 @@ import com.BAN.Signature.Electronique.Model.Signature;
 import com.BAN.Signature.Electronique.Service.DocfileService;
 import com.BAN.Signature.Electronique.Service.EmailService;
 
+import com.itextpdf.text.DocumentException;
 import com.qoppa.pdf.PDFException;
 import jakarta.activation.DataSource;
 import jakarta.mail.MessagingException;
@@ -61,10 +62,10 @@ public class DocfileController {
     // MultipartFile : representation dial hadak lfichier li ja mn request multipart request
 
     public ResponseEntity<Docfile> AddDocFile(@PathVariable Long id_emp,
-                                              @RequestParam("file2") MultipartFile file)throws  IOException{
+                                              @RequestParam("file2") MultipartFile file) throws IOException, DocumentException {
         return new ResponseEntity<>(docfileService.AdddocfiletoEmployee(file,id_emp),HttpStatus.OK);
     }
-
+    // checked exception should be managed in both of them
 
     @GetMapping(value = "/SignYourPdf/{id_emp}/{id_doc}/{id_sign}")
     public ResponseEntity<HttpStatus> SignDocument(@PathVariable Long id_emp,

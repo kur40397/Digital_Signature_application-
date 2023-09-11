@@ -7,6 +7,10 @@ import com.BAN.Signature.Electronique.Model.Signature;
 import com.BAN.Signature.Electronique.Repository.DocfileRepository;
 import com.BAN.Signature.Electronique.Repository.EmployeerRepository;
 import com.BAN.Signature.Electronique.Repository.SignatureRepository;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.qoppa.pdf.*;
 import com.qoppa.pdf.form.SignatureField;
 import com.qoppa.pdf.permissions.AllPDFPermissions;
@@ -105,7 +109,7 @@ public class DocfileService implements DocfileServiceInter {
     @Value("${spring.servlet.multipart.max-file-size}")
     private  String file_size;
     @Override
-    public Docfile AdddocfiletoEmployee(MultipartFile file, Long id_emp) throws IOException {
+    public Docfile AdddocfiletoEmployee(MultipartFile file, Long id_emp) throws IOException, DocumentException {
         Employee employeeref = employeerRepository.findById(id_emp).orElseThrow(() -> new EmployeeNotFoundException(String.format(MessageException,id_emp)));
         // hadi docf.getOriginalFilename() rah  tkad traja3 lik null  donc remplacinaha b Objects.requireNonNull(docf.getOriginalFilename())
          String fileName = file.getOriginalFilename();
@@ -125,7 +129,18 @@ public class DocfileService implements DocfileServiceInter {
 
         if(fileName.isEmpty() || fileName.length() < 2 || characters.stream().anyMatch(e -> fileName.contains(e.toString())))
             throw new InvalidFileNameException("invalid file name exception",fileName);
-
+        PdfReader reader = new PdfReader((InputStream) file);
+        // InputStream kat9ra lik data mn ayi source
+        // PdfReader dial pdf bou7do et manipulation +extract text ====> 5asa b le fichier pdf
+        File tempf=FileUtils.getFile("temp",".pdf");
+        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(tempf), PdfWriter.VERSION_1_5);
+        // Objet li imkan lina nkriou changement f pdf document
+        // new FileOutputStream(tempf) help you when to put changes
+        stamper.getWriter().setCompressionLevel(9); // niveau de la compression => niveau 9 compression tal3a
+        stamper.setFullCompression(); // activi la compression
+        stamper.close();
+        reader.close();
+        // compression ==> reduce file size
         // equals kancompariou bih texte
         if(!file.getContentType().split("/")[1].equals("pdf"))
             throw  new InvalidContentTypeException("invalid format exception");

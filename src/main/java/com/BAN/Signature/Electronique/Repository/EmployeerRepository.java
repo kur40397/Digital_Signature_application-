@@ -42,9 +42,9 @@ public interface EmployeerRepository extends JpaRepository<Employee,Long> {
     // kanchofouhoum wech kaymatchiou kamline
 
      Page<Employee> findByCreatedAtBetween(LocalDateTime from,LocalDateTime to,Pageable pageable);
-     @Query(value = "select empdepartment from tblemployee",nativeQuery = true)
+     @Query(value = "select DISTINCT empdepartment from tblemployee",nativeQuery = true)
      List<String> SelectDepartment();
-     @Query(value = "select empmission from tblemployee",nativeQuery = true)
+     @Query(value = "select DISTINCT empmission from tblemployee",nativeQuery = true)
     List<String> SelectMissions();
 
 

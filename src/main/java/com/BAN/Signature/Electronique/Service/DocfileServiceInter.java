@@ -1,6 +1,7 @@
 package com.BAN.Signature.Electronique.Service;
 
 import com.BAN.Signature.Electronique.Model.Docfile;
+import com.itextpdf.text.DocumentException;
 import com.qoppa.pdf.PDFException;
 import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface DocfileServiceInter {
-    Docfile AdddocfiletoEmployee(MultipartFile file, Long id) throws IOException;
+    Docfile AdddocfiletoEmployee(MultipartFile file, Long id) throws IOException, DocumentException;
 
 
     // affichez la list des documents pdf
