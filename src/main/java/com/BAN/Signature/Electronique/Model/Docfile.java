@@ -1,35 +1,97 @@
 package com.BAN.Signature.Electronique.Model;
 
+import com.fasterxml.jackson.annotation.*;
+import com.qoppa.pdf.k.b;
 import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import oracle.jdbc.*;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
 
+import java.io.File;
+import java.sql.Blob;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
-@Data
-@Entity(name = "Docfile")
+import static oracle.jdbc.OracleType.BLOB;
+
+@Setter
+@Getter
+@Entity
+@Table(name = "mypdfdoc")
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
+@JsonIgnoreProperties(value = {"createdAt","updatedAt"})
+// to avoid hadak stuckoverflow ,jackson llibrary kay3ti l'id lkola object kbal matserializa , bach i3kal 3lih et may3awadch isyalizih
 public class Docfile {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     //id 5aso ikoun long
+    @Column(nullable = false,name = "iddoc",precision=10)
+    //select mysignature_seq.nextval generate unique sequence number
+    // mysignature_seq objet oracle li & next.val method bach tginiri lina the next value
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
-    @NotBlank(message = "insert the file name")
-    private String fileName;
+    @NotBlank(message = "right down your fullname")
+    //@Size(min = 3, max = 15)
+    @Column(name = "docname",nullable = false)
+    private String pdfname;
     // pdf katstoka sous forme de byte array dial byte
     // byte ==> 8 bit
-    private byte[] fileContent;
-    private Long size;
+    @Column(name = "docsize")
+    private Long pdfsize;
+
+    // katgol bli had l'attribut kaystoki les objets kbar contenu binaire ou bien les fichier kbar
+
+    @Column(name="docsigned",nullable = false)
+    private boolean signed=false;
+
+    @Lob
+    @Column(name="docsignedfile")
+    // columnDefinition katdefini lik le type dial la base de donnée
+    private byte[] signedfile;
+    @Lob
+
+    private byte[] pdffile;
     @CreationTimestamp //set value in the database when the entity is saved
-
-    private LocalDateTime created_at;
-
+    @Column(name = "createdAtDoc",nullable = false)
+    private LocalDateTime createdAt;
     @UpdateTimestamp
-    private LocalDateTime updated_at;
+    @Column(name = "updatedAtDoc",nullable = false)
+    private LocalDateTime updatedAt; // _ un signe dial la fin du mot ==> 7aydo f entité
+    @Column(name="docsignedAt")
+    private LocalDateTime SignedAt;
 
-    @ManyToOne // rah many to one fin kayna la clé étrangère
-    @JoinColumn(name = "Employee_id")
-    private Employee employee;
+    //@JsonBackReference
+   @ManyToOne() // rah many to one fin kayna la clé éetrangère
+
+    @JsonBackReference
+
+    @JoinColumn(name="docemployeeid", referencedColumnName = "idemp",nullable = true)// referencedColumnName ==> smit la column li katreferenci la clé étrangère
+    // mnin radi convertiou a Document object to JSON
+    // json maradich iserializi la referance la clé etrangère
+    // katgol lik bli @jsonmanagerReference rah
+    // kadya lrad
+    // Employee own documents , machi l3aks
+    private Employee empl2;
+   // many to many relation ship
+    @ManyToMany(cascade = CascadeType.REMOVE ,fetch = FetchType.LAZY) // f owning side 5asni nspecifie type de cascade
+    @JoinTable(
+            name = "docfilesignature",
+            joinColumns = @JoinColumn(name = "docfileid"),// la clé etrangère le katreferenci lowning side
+            inverseJoinColumns = @JoinColumn(name = "signatureid"))// la clé etrangère li katreferenci non owning side
+    // owing side hiya li 5as ikoun fiha jointable ama no owning side 5as ikoun fiha mappedby
+
+    private List<Signature> signatures_file; // la collection dial l'autre coté
 
 }
+

@@ -1,8 +1,9 @@
 package com.BAN.Signature.Electronique.Service;
 
 import com.BAN.Signature.Electronique.Model.Employee;
+import org.springframework.data.domain.Page;
 
-import java.awt.print.Pageable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EmployeeServiceInter {
@@ -10,11 +11,17 @@ public interface EmployeeServiceInter {
     void DeleteEmployee(Long id);
     Employee UpdateEmployee(Long id,Employee employee);
 
-    List<Employee> getAllEmployee(Integer page,Integer size,String sort);
+
     Employee getById(Long id);
-    List<Employee> Search(String complete_name);
+    Page<Employee> Search(String name, Integer page, Integer size, String sort);
+     Page<Employee> GroupeByDepartement(String dep,Integer page,Integer size,String sort );
+    Long NumberOfEmployees();
+    Integer CountBydepartement(String dep);
 
+     Page<Employee> findbetweenDates(LocalDateTime from,LocalDateTime to, Integer page, Integer size, String sort);
 
+    List<String> findAllDepartements();
+    List<String> findAllMissions();
 
 
 
