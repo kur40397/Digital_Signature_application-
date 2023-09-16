@@ -7,6 +7,7 @@ import com.BAN.Signature.Electronique.Model.Signature;
 import com.BAN.Signature.Electronique.Repository.DocfileRepository;
 import com.BAN.Signature.Electronique.Repository.EmployeerRepository;
 import com.BAN.Signature.Electronique.Repository.SignatureRepository;
+import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -25,6 +26,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.encryption.DecryptionMaterial;
 import org.apache.pdfbox.pdmodel.encryption.PDEncryption;
 import org.apache.pdfbox.pdmodel.encryption.SecurityHandler;
+import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.apache.tomcat.util.http.fileupload.InvalidFileNameException;
 import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,30 +126,17 @@ public class DocfileService implements DocfileServiceInter {
             throw new FileNotFoundException(MessageExceptionFileNotFoundException);
 
         List<Character> characters=new ArrayList<>(List.of(INVALID_WINDOWS_SPECIFIC_CHARS));
-        // une list kat initializa b une liste
+        // une list kat initializa b une list
         // katcriyi lik une liste fixe non modifiable List.of
 
-        if(fileName.isEmpty() || fileName.length() < 2 || characters.stream().anyMatch(e -> fileName.contains(e.toString())))
+        if(fileName.isEmpty()  || characters.stream().anyMatch(e -> fileName.contains(e.toString())))
             throw new InvalidFileNameException("invalid file name exception",fileName);
-        PdfReader reader = new PdfReader((InputStream) file);
-        // InputStream kat9ra lik data mn ayi source
-        // PdfReader dial pdf bou7do et manipulation +extract text ====> 5asa b le fichier pdf
-        File tempf=FileUtils.getFile("temp",".pdf");
-        PdfStamper stamper = new PdfStamper(reader, new FileOutputStream(tempf), PdfWriter.VERSION_1_5);
-        // Objet li imkan lina nkriou changement f pdf document
-        // new FileOutputStream(tempf) help you when to put changes
-        stamper.getWriter().setCompressionLevel(9); // niveau de la compression => niveau 9 compression tal3a
-        stamper.setFullCompression(); // activi la compression
-        stamper.close();
-        reader.close();
-        // compression ==> reduce file size
-        // equals kancompariou bih texte
+
         if(!file.getContentType().split("/")[1].equals("pdf"))
             throw  new InvalidContentTypeException("invalid format exception");
 
         if(file.getSize()>file_size1)
             throw new MaxUploadSizeExceededException(file_size1);
-
 
         try {
             Docfile docfile = new Docfile();
@@ -155,12 +144,6 @@ public class DocfileService implements DocfileServiceInter {
             docfile.setPdfname(file.getOriginalFilename());
             docfile.setPdffile(file.getBytes());// k serializa sous forme  lpath // reference
             docfile.setEmpl2(employeeref);
-            /*
-            List<Docfile> list=new ArrayList<>();
-            list.add(docfile);
-            employeeref.setFile1(list);
-             spring radi ajouter automaticment le document f la list dial les employees
-             */
             return docfileRepository.save(docfile);
         }catch (IOException e){
             throw  new IOException(MessageExceptionIOException);
@@ -205,11 +188,11 @@ public class DocfileService implements DocfileServiceInter {
 
         Signature signature=signatureRepository.findById(id_sign).orElseThrow(()->new SignatureNotFoundException(String.format(MessageExceptionSign,id_sign)));
         if(!Objects.equals(signature.getEmpl2().getId(),id_emp))
-            throw new SignatureNotFoundException(String.format(MessageExceptionSign,id_sign));
+            throw new SignatureNotFoundException(String.format(MessageExceptionSign, id_sign));
 
-        File f1 = File.createTempFile("temp", ".pdf");
+            File f1 = File.createTempFile("temp", ".pdf");
 
-            FileOutputStream fout = new FileOutputStream(f1); // un objet li kay5alina npassiou le contenu binaire f l'objet fichier f params
+            FileOutputStream fout = new FileOutputStream(f1); // un objet li kay5alina npassiou le contenu binaire a l'aide de la method write vers le fichier li kayn f parametres
             fout.write(docfile.getPdffile());
 
             fout.close(); // en of stream
@@ -219,7 +202,7 @@ public class DocfileService implements DocfileServiceInter {
             // PDFSecure wa7d java library that can digitally sign pdf documents
             // kanmodifi f les permission , la signature elec, password
 
-            // \\ katpresenti backslach wa7da  \ kaychangi l'interpretation dial un charactère
+            // \\ katpresenti backslach wa7da  \ kaychangi l'interpretation dial un character
 
             FileInputStream pkcs12Stream = new FileInputStream(directory);// FIleInputStream bach tkra data dial un fichier(signature.pfx) li fih private key + certificat
             // FileInputStream open connexion with the actual file
@@ -228,7 +211,7 @@ public class DocfileService implements DocfileServiceInter {
             KeyStore store = KeyStore.getInstance("PKCS12");// PKCS12 file format li fin tkad tstoki private keys, public keys, and the corresponding certificates
             //  PKCS12 kay7mi ayi access non authorise
             store.load(pkcs12Stream, password.toCharArray());//toCharArray() katconverti string lwa7d larray of chars
-            // had la line kaychargi le contenu dial lkeystore file avec le mot de passe dialou f l'object KeyStore
+            // had la line kaychargi le contenu dial lkeystore file avec le mot de passe dial la clé privée
 
             pkcs12Stream.close();// fima radi tkra chi fichier radi tsado (close streaming)
 
@@ -241,16 +224,12 @@ public class DocfileService implements DocfileServiceInter {
             // myalias: wa7d surname dial la certificate bach idefirenci entre les certificats
             // mypassword: le mot de passe pour la clé privée
 
-
-            // signingInformation.setLock(true);
-
-
             SignatureAppearance signatureAppearance = signingInformation.getSignatureAppearance();
             //signatureAppearance= how signature will appear // la signature customized
             // blast matwarini le nom du signataire warini la signature
             signatureAppearance.setVisibleName(false);
             signatureAppearance.setImagePosition(SwingConstants.LEFT);
-            //SwingConstants fiha l'ensemble dial les constant biha bach nbadlou la position dial chi un component
+            //SwingConstants fiha l'ensemble dial les constant biha bach nbadlou la position dial chi un component graphiquement
 
             File img = File.createTempFile("temp", ".png");
 
@@ -274,7 +253,7 @@ public class DocfileService implements DocfileServiceInter {
 
             docfile.setSignedAt(LocalDateTime.parse(LocalDateTime.now().format(format), format));
             // LocalDateTime.parse ==> biha kanconvertiou la representation dial la date en string lformat LocalDateTime date
-            // le paramter formatter ===> katgolih kifach ikra la date representé au format string
+            // le paramter formatter ===> katgol kifach ikra la date li maktoba en format string
 
             signatureAppearance.setTextRight("This file is signed by " + employee.getName() + " at " + docfile.getSignedAt());
             //*********************************les champs de la signature*************************************//
@@ -291,25 +270,24 @@ public class DocfileService implements DocfileServiceInter {
 
 
             FileOutputStream fileOutputStream = new FileOutputStream(f1);
-            pdfDoc.saveDocument(fileOutputStream);// radi istam3mal had l'object bach ipassi le contenu binaire mn
+            pdfDoc.saveDocument(fileOutputStream);// radi istam3mal had l'object bach ipassi le contenu binaire
             fileOutputStream.close();
 
-            // file makaypresentich le contenu dialou
+            // file makaypresentich le contenu dialou mais kaypresenti le path dialou
             Path p = Path.of(f1.getAbsolutePath());// kat3ti 7ta le nom dial fichiers
 
             docfile.setSigned(true);
 
             docfile.setPdfname(docfile.getPdfname().substring(0, (docfile.getPdfname().length() - 4)) + "_signed.pdf"); // mn srir lkbir
 
-
             // subString 5od mn string lkbir had la partie li drt liha limite
             docfile.setPdfsize(f1.length());// size dial lfile b length
 
             docfile.setSignedfile(Files.readAllBytes(p));
-            List<Signature> signatureList=new ArrayList<>();
-            signatureList.add(signature);
+            // Files.readAllBytes(p) kat9ra lik le contenu binaire mn un path
+
             // Collections.singletonList(signature) ma5asekch t5dem biha 7it hiya non modifiyable
-            docfile.setSignatures_file(signatureList); // radi insiri le l'id signature and l'id doc f join table
+
 
             docfileRepository.save(docfile);
             log.info("the signed document has been in add in the database");
@@ -323,6 +301,7 @@ public class DocfileService implements DocfileServiceInter {
         //********************************************************************************************************//
 
         String[] email =new String[]{employee.getEmail()};
+
         emailService.sendMailWithAttachment(email,sender,String.format(EmailForNotification,employee.getName(),docfile.getPdfname()),"Your document you have about to signe",docfile.getSignedfile(),docfile.getPdfname());
 
     }
@@ -359,10 +338,10 @@ public class DocfileService implements DocfileServiceInter {
         if(employee.getFile1().isEmpty())
             throw new NonePdfFoundException(String.format(MessageExceptionNonePDFDocumentFoundException,employee.getId()));
 
-        if(employee.getFile1().stream().anyMatch(x->Objects.equals(x.getId(),id_doc)))
+        if(!docfileRepository.existsById(id_doc))
             throw new DocfileNotFoundException(String.format(MessageExceptionDoc,id_doc));
 
-        if(!docfileRepository.existsById(id_doc))
+        if(employee.getFile1().stream().noneMatch(x->Objects.equals(x.getId(),id_doc)))
             throw new DocfileNotFoundException(String.format(MessageExceptionDoc,id_doc));
 
         docfileRepository.deleteById(id_doc);
@@ -418,7 +397,7 @@ public class DocfileService implements DocfileServiceInter {
             throw new NonePdfFoundException(MessageExceptionNonePDFDocumentFoundException);
         }
         Pageable pageable=PageRequest.of(page,size,Sort.by(Sort.Direction.ASC,sort));
-        DateTimeFormatter fmt=DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter fmt=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return docfileRepository.findByCreatedAtBetweenAndEmpl2Id(LocalDateTime.parse(from,fmt),LocalDateTime.parse(to,fmt),id_emp,pageable);
     }
 
@@ -437,6 +416,8 @@ public class DocfileService implements DocfileServiceInter {
         if(!docfile.isSigned())
             throw new NoneSignedPdfFoundException(String.format(MessageExceptionPdfNotSignedException,id_doc));
 
+
+        docfile.setSignatures_file(null);
         docfile.setSignedAt(null);
         docfile.setSigned(false);
         docfile.setSignedfile(null);
@@ -446,6 +427,7 @@ public class DocfileService implements DocfileServiceInter {
     @Override
     public boolean IsDocumentPDFSigned(Long id_emp, Long id_doc) {
         Employee employee=employeerRepository.findById(id_emp).orElseThrow(()->new EmployeeNotFoundException(String.format(MessageException,id_emp)));
+
         if(docfileRepository.countByEmpl2IdAndSigned(id_emp,true)==0)
             throw new NoneSignedPdfFoundException(String.format(MessageExceptionNoneSignedPDFDocumentFoundException,id_emp));
 
@@ -475,15 +457,14 @@ public class DocfileService implements DocfileServiceInter {
              throw new NoneSignedPdfFoundException(String.format(MessageExceptionPdfNotSignedException,id_doc));
 
         Signature signature=signatureRepository.findById(id_sign).orElseThrow(()->new SignatureNotFoundException(String.format(MessageExceptionSign,id_sign)));
-         if(!Objects.equals(signature.getEmpl2().getId(),id_emp)){
+         if(!Objects.equals(signature.getEmpl2().getId(),id_emp))
              throw new SignatureNotFoundException(String.format(MessageExceptionSign,id_sign));
-         }
 
-        if(docfile.getSignatures_file().stream().anyMatch(x->Arrays.equals(x.getImage(),signature.getImage()))){
 
+
+        if(docfile.getSignatures_file().stream().anyMatch(x->Arrays.equals(x.getImage(),signature.getImage())))
             throw new SignatureAlreadyUsedException(String.format(MessageExceptionSignatureAlreadyUsedException,id_sign));
 
-        }
 
         File f1 = File.createTempFile("tempo", ".pdf");
         // bach tpassi le contenu binaire li dak le fichier li 7tinah f parametre
@@ -548,20 +529,7 @@ public class DocfileService implements DocfileServiceInter {
         // mnin kayinisitaliza l'array makandirouch le nombre dial les elements f la case
         emailService.sendMailWithAttachment(email,sender,String.format(EmailForNotification,employee.getName(),docfile.getPdfname()),"your document's Signature Update",docfile.getSignedfile(),docfile.getPdfname());
     }
-    @Override
-    public boolean checkIfEmployeeSignTheDocument(Long id_emp,Long id_doc){
-        Employee employee=employeerRepository.findById(id_emp).orElseThrow(()->new EmployeeNotFoundException(String.format(MessageException,id_emp)));
-        if(employee.getSignature()==null){
-            throw new SignatureNotFoundException(String.format(MessageExceptionSign,employee.getSignature().getId()));
-        }
-        Docfile docfile=docfileRepository.findById(id_doc).orElseThrow(() -> new DocfileNotFoundException(String.format(MessageExceptionDoc,id_doc)));
 
-        if(docfile.getSignatures_file().stream().anyMatch(x->Objects.equals(x.getId(),employee.getSignature().getId()))){
-            throw new SignatureAlreadyUsedException(String.format(MessageExceptionSignatureAlreadyUsedException,employee.getSignature().getId()));
-            // mnin katrowa une exception kat9alab 3la nearest catch f un block de code dakchi li mnb3d matayexecutach
-        }
-        return false;
-    }
     @Override
     public void MakeMultipleSignatures(Long idemp_s,Long id_emp, Long id_doc, Long id_sign) throws IOException, PDFException, GeneralSecurityException, MessagingException{
 
@@ -591,13 +559,13 @@ public class DocfileService implements DocfileServiceInter {
 
         SignatureField signatureField1;
         if(pdfDoc.getSignatureFields()==null ) {
-            Rectangle2D signBounds = new Rectangle2D.Double(470, 700, 194, 48);// katdir object rectangle ,la position dialou x and y and la largeur dialou weight and height
+            Rectangle2D signBounds = new Rectangle2D.Double(400, 700, 194, 48);// katdir object rectangle ,la position dialou x and y and la largeur dialou weight and height
              signatureField1 = pdfDoc.addSignatureField(0, "signature", signBounds);
         }else if(!pdfDoc.getSignatureFields().isEmpty() && pdfDoc.getSignatureFields().size()<2  ){
             Rectangle2D signBounds = new Rectangle2D.Double(140, 700, 194, 48);// katdir object rectangle ,la position dialou x and y and la largeur dialou weight and height
              signatureField1 = pdfDoc.addSignatureField(0, "signature", signBounds);
         }else{
-            Rectangle2D signBounds = new Rectangle2D.Double(200, 530, 194, 48);// katdir object rectangle ,la position dialou x and y and la largeur dialou weight and height
+            Rectangle2D signBounds = new Rectangle2D.Double(200, 460, 194, 48);// katdir object rectangle ,la position dialou x and y and la largeur dialou weight and height
              signatureField1 = pdfDoc.addSignatureField(0, "signature", signBounds);
         }
         FileInputStream pkcs12Stream = new FileInputStream(directory);
@@ -651,7 +619,4 @@ public class DocfileService implements DocfileServiceInter {
         String[] email =new String[]{employee.getEmail()};
         emailService.sendMailWithAttachment(email,sender,String.format(EmailForNotification2,employee.getName(),docfile.getPdfname(),employeesender.getName()),"Your document you have about to signe",docfile.getSignedfile(),docfile.getPdfname());
     }
-
-
-
 }

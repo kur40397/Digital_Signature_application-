@@ -63,7 +63,7 @@ public class SignatureService implements SignatureServiceInter {
 
     @Override
     public Signature AddSignaturetoEmployee(MultipartFile image, Long id_emp) throws IOException {
-        Employee employee= employeerRepository.findById(id_emp).orElseThrow(()->new EmployeeNotFoundException(String.format(MessageException,id_emp)));
+        Employee employee= employeerRepository.findById(id_emp).orElseThrow(()->new EmployeeNotFoundException(String.format(MessageExceptionEmployeeNotFound,id_emp)));
         String imageName = image.getOriginalFilename();
         long file_size1=Long.parseLong(file_size);
         if(!image.getResource().exists()){ // la resource hiya ayi 7aja kayna f fichier system
@@ -193,19 +193,20 @@ public class SignatureService implements SignatureServiceInter {
     @Override
     public List<Signature> DisplayListOfSignaturesByIddoc(Long id_emp, Long id_doc) {
         Employee employee = employeerRepository.findById(id_emp).orElseThrow(() -> new EmployeeNotFoundException(String.format(MessageExceptionEmployeeNotFound, id_emp)));
-        if (employee.getSignature() == null) {
+        if (employee.getSignature() == null)
             throw new SignatureNotFoundException(String.format(MessageExceptionSign1,employee.getId()));
-        }
-        if(employee.getFile1().isEmpty()){
+
+        if(employee.getFile1().isEmpty())
             throw new NonePdfFoundException(String.format(MessageExceptionNonePDFDocumentFoundException,employee.getId()));
-        }
+
         Docfile docfile=employee.getFile1().stream().filter(x-> Objects.equals(id_doc, x.getId())).findFirst().orElseThrow(()->new DocfileNotFoundException(String.format(MessageExceptionDoc,id_doc)));
-
-        if(docfile.isSigned()){
-
+        // filter : kat5dem m3a les streams , kat5od le premier resultat dial un filtre & katreturni object optional
+        if (!Objects.equals(docfile.getId(), id_doc)) {
+            throw new SignatureNotFoundException(String.format(MessageExceptionDoc, docfile.getId()));
+        }
+        if(docfile.isSigned())
             return docfile.getSignatures_file();
 
-        }
-            throw new NoneSignatureExistInAPdfDocException(String.format(MessageExceptionNoneSignatureFoundInaPdfDocException,id_doc));
+        throw new NoneSignatureExistInAPdfDocException(String.format(MessageExceptionNoneSignatureFoundInaPdfDocException,id_doc));
     }
 }

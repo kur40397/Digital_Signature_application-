@@ -51,8 +51,8 @@ public class EmployeeController {
          return new ResponseEntity<>(employeeService.SaveEmployee(employee),HttpStatus.OK);
     }
     @GetMapping("/GetEmployees/{dep}")
-    public ResponseEntity<Page<Employee>> GetEmployee(@PathVariable String dep
-                                                     ,@RequestParam(defaultValue = "0") Integer page,
+    public ResponseEntity<Page<Employee>> GetEmployee(@PathVariable String dep,
+                                                     @RequestParam(defaultValue = "0") Integer page,
                                                       @RequestParam(defaultValue = "3") Integer size,
                                                       @RequestParam(defaultValue = "idemp") String sort){
 
@@ -91,7 +91,7 @@ public class EmployeeController {
     public ResponseEntity<Long> GetEmployeeNumber(){
         return new ResponseEntity<>(employeeService.NumberOfEmployees(),HttpStatus.OK);
     }
- // not in the request body because it has limitation , params la dir li briti
+    // not in the request body because it has limitation , params la dir li briti
     // la method prefere , 7it security
     @GetMapping("/GetbetweenDates")
     public ResponseEntity<Page<Employee>> GetEmployeeBetween(@RequestParam String from,
@@ -101,7 +101,6 @@ public class EmployeeController {
                                                              @RequestParam(defaultValue = "idemp") String sort){
         DateTimeFormatter fmt=DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         // formatter: une expression régulière pour les dates
-
         return new ResponseEntity<>(employeeService.findbetweenDates(LocalDateTime.parse(from,fmt),LocalDateTime.parse(to,fmt),page,size,sort),HttpStatus.OK);
         //LocalDateTime.parse(from,fmt) jbd liya mn un string une instance localDateTime
 

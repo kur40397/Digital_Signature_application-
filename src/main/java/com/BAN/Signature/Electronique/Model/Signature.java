@@ -58,7 +58,8 @@ public class Signature {
     private Employee empl2;
 
 
-   @ManyToMany(mappedBy = "signatures_file",fetch = FetchType.LAZY)
+   @ManyToMany(fetch = FetchType.LAZY,mappedBy = "signatures_file")
+   // mappedby : f manytomany katdirha f non owning side
    // ida madrtich mappedBy la table join maradich t3mar
    // f bidireactionnal nonn owning side fiha mappedby ==> many to many
    @JsonIgnore

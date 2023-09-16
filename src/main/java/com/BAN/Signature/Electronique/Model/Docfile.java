@@ -42,7 +42,7 @@ public class Docfile {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     @NotBlank(message = "right down your fullname")
-    //@Size(min = 3, max = 15)
+
     @Column(name = "docname",nullable = false)
     private String pdfname;
     // pdf katstoka sous forme de byte array dial byte
@@ -60,9 +60,8 @@ public class Docfile {
     // columnDefinition katdefini lik le type dial la base de donnée
     private byte[] signedfile;
     @Lob
-
     private byte[] pdffile;
-    @CreationTimestamp //set value in the database when the entity is saved
+    @CreationTimestamp //mnin katcriya wa7d l'entité autoquement la field dial l'ajout
     @Column(name = "createdAtDoc",nullable = false)
     private LocalDateTime createdAt;
     @UpdateTimestamp
@@ -84,7 +83,8 @@ public class Docfile {
     // Employee own documents , machi l3aks
     private Employee empl2;
    // many to many relation ship
-    @ManyToMany(cascade = CascadeType.REMOVE ,fetch = FetchType.LAZY) // f owning side 5asni nspecifie type de cascade
+    @ManyToMany(fetch = FetchType.LAZY) // f owning side 5asni nspecifie type de cascade & mappedby
+
     @JoinTable(
             name = "docfilesignature",
             joinColumns = @JoinColumn(name = "docfileid"),// la clé etrangère le katreferenci lowning side
@@ -92,6 +92,9 @@ public class Docfile {
     // owing side hiya li 5as ikoun fiha jointable ama no owning side 5as ikoun fiha mappedby
 
     private List<Signature> signatures_file; // la collection dial l'autre coté
+
+    // on ajout l'entity docfile, automatiquement la list dial les docfile katdar liha l'update
+    // orphan makaykounch f manytomany relationship
 
 }
 

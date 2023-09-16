@@ -187,7 +187,6 @@ public class DocfileController {
                                                         @RequestParam(defaultValue = "5") Integer size,
                                                         @RequestParam(defaultValue = "iddoc") String sort){
 
-
         return new ResponseEntity<>(docfileService.SearchDocsBetweenDates(from,to,id_emp,page,size,sort),HttpStatus.OK);
     }
     @GetMapping(value = "/DeleteSignedDocument/{id_emp}/{id_doc}")
@@ -202,9 +201,5 @@ public class DocfileController {
                                                    @PathVariable Long id_doc){
        return new ResponseEntity<>(docfileService.IsDocumentPDFSigned(id_emp,id_doc),HttpStatus.OK);
     }
-    @GetMapping(value = "/CheckIfEmployeeSignTheDocument/{id_emp}/{id_doc}")
-    public ResponseEntity<Boolean> CheckIfEmployeeSignTheDocument(@PathVariable Long id_emp,
-                                                                  @PathVariable Long id_doc){
-        return new ResponseEntity<>(docfileService.checkIfEmployeeSignTheDocument(id_emp,id_doc),HttpStatus.OK);
-    }
+
 }

@@ -11,7 +11,11 @@ public enum Department {
     // les constante dialouek
     // bdabt l'instance variable dialou
     private  String desc;
-    private Department(String desc){
+    Department(String desc){
         this.desc=desc;
+    }
+
+    public String getDesc() {
+        return desc;
     }
 }

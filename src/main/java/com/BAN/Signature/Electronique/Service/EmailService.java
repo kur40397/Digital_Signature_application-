@@ -127,34 +127,37 @@ public class EmailService implements EmailServiceInter{
 
         int size=listEmployee.size();
         InternetAddress[] addresses = new InternetAddress[listEmployee.size()];
-        // une method li parameter dialha abstruct kat9bal kat9bal les object li kayimplimentiouha
+        // une method li parameter dialha abstruct kat9bal les object li kayimplimentiouha
 
         for(int i=0;i<size;i++){
                addresses[i] = new InternetAddress(listEmployee.get(i).getEmail());
         }
         MimeMessage message=javaMailSender.createMimeMessage();
         // MimeMessage katpresenti lik email et kat5alik tconstruit une structure dialou
-        // katsimplifi lik l5dma dial mimeMessage & 3andha des methods bach t5dem for sending attachement
-        // parse ==> bach tparcilik one email or more email
+        // createMessageHelper work as helper class for MimeMessage to add the attachment and other
+        // details required to send the email
+
         MimeMessageHelper createMessageHelper = new MimeMessageHelper(message, true);// katsimplifi lik createMimeMessage
         List<Long> links=new ArrayList<>();
         for (Docfile listdoc : listdocs) {
             links.add(listdoc.getId());
         }
         for(int i=0;i<listEmployee.size() ;i++) {
+
             try {
                 createMessageHelper.setFrom(sender);
                 createMessageHelper.setTo(addresses[i]);
                 createMessageHelper.setCc(employee.getEmail());
-                createMessageHelper.setSubject("Notification from Sign documents");
+                createMessageHelper.setSubject("Document to sign");
                 // ByteArrayDataSource: kaypresenti lik wa7d datasource li fiha byteArray
-                //  DataSource : katpresenti lik wa7d lcontenu li radi tenvoya f email
+                //  DataSource : objet li fih hadak le contenu li radi tenvoya f mail
                 createMessageHelper.setText("Mr "+employee.getName()+" want from you to sign this document his the link "+
                         LinkMail+listEmployee.get(i).getId()+"?id_docs="+links.toString().replace("[", "").replace("]", "").replace(" ",""));
 
                 for (int j=0;j<listdocs.size();j++) {
                     createMessageHelper.addAttachment(listdocs.get(j).getPdfname(), new ByteArrayDataSource(listdocs.get(j).getPdffile(), "application/pdf;"));
                 }
+
                 javaMailSender.send(message);
                 log.info("the email has been sent");
             } catch (MessagingException e) {

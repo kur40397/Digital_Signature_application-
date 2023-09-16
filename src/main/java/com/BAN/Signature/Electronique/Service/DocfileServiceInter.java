@@ -22,9 +22,8 @@ public interface DocfileServiceInter {
     // affichez la list des documents pdf
 
 
-    public Page<Docfile> SearchSignedDocsOfAnEmployeeByKeyword(Long id_emp,String keyword,Integer page, Integer size, String sort);
-
-    public Page<Docfile> SearchNotSignedDocsOfAnEmployeeByKeyword(Long id_emp, String keyword, Integer page, Integer size, String sort);
+     Page<Docfile> SearchSignedDocsOfAnEmployeeByKeyword(Long id_emp,String keyword,Integer page, Integer size, String sort);
+     Page<Docfile> SearchNotSignedDocsOfAnEmployeeByKeyword(Long id_emp, String keyword, Integer page, Integer size, String sort);
 
 
     void SignDocument(Long id_emp, Long id_doc, Long id_sign) throws IOException, GeneralSecurityException, PDFException, MessagingException;
@@ -49,5 +48,5 @@ public interface DocfileServiceInter {
      boolean IsDocumentPDFSigned(Long id_emp, Long id_doc);
      void UpdateYourPdfFileSignature(Long id_emp, Long id_doc, Long id_sign) throws IOException, PDFException, GeneralSecurityException, MessagingException;
      void MakeMultipleSignatures(Long id_emp_s,Long id_emp,Long id_doc,Long id_sign)throws IOException, PDFException, GeneralSecurityException, MessagingException;
-    public boolean checkIfEmployeeSignTheDocument(Long id_emp,Long id_doc);
+
 }
