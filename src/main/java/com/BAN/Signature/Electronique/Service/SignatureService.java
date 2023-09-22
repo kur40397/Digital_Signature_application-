@@ -92,10 +92,11 @@ public class SignatureService implements SignatureServiceInter {
         BufferedImage imbu= ImageIO.read(image.getInputStream());
         // ImageIO kat9ra lik le contenu binaire dial une image
         // getInputStream  ==> InputStream object li fih le contenu binaire
-
+        /*
         if(imbu.getHeight()>200 || imbu.getWidth()>400||imbu.getWidth()<100 || imbu.getHeight()<150){
             throw new ImageDimensionException(ImageDimensionException);// exception
         }
+         */
         try{
             // katvalidi lik le parameter ida kan non null ma7ba ida makanch rah kat throwi null
             Signature signature1=new Signature();

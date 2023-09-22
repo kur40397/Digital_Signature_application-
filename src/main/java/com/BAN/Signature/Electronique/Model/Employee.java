@@ -47,14 +47,10 @@ public class Employee implements Serializable {
     // t5dem m3a ayi ds
     @Column(nullable = false,name = "idemp",precision=10)
     private Long Id;
-    @NotBlank(message = "right down your fullname")
-    //@NotEmpty : matsiftch null value & empty string
-    //@NotBlank : matsiftch null value & empty string & white space
-    //@NotNull :  insure that the user do not send null input
-    @Size(min = 3, max = 15)
+    @NotBlank
+
     @Column(name = "emplname",nullable = false)
     private String name;
-    @NotBlank(message = "right down your fullname")
     @Email
     @Column(name = "empemail",nullable = false,length = 25)
     private String email;

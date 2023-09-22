@@ -55,6 +55,7 @@ public class EmployeeService implements EmployeeServiceInter{
     // l'exception katthowa peut importe le type de retour
     @Override
     public void DeleteEmployee(Long id) {
+
         if(!employeerRepository.existsById(id)){
             throw new EmployeeNotFoundException(String.format(MessageException,id));// finma kayn chi format specifiyer kantremplacih
             // b la valeur li deuxieme argument

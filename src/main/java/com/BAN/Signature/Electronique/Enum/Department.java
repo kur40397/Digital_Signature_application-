@@ -1,5 +1,8 @@
 package com.BAN.Signature.Electronique.Enum;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum Department {
 
     IT("INFORMATION TECHNOLOGY"),
@@ -18,4 +21,5 @@ public enum Department {
     public String getDesc() {
         return desc;
     }
+
 }
